@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca tu película</title>
+    <link rel="stylesheet" href="movie_posters.css">
+    <link rel="shortcut icon" href="./images/popcorn150px.jpg" type="image/x-icon" sizes="40x40">
+</head>
+
+<body>
+
+    <div id="header">
+        <div class="webLogo"><img src=./images/webIcon.png></div>
+        <div id="webTitle">Palomitas</div>
+    </div>
+    <div id="body">
+        <div id="menu">
+            <div class="menuBox">
+                <div class="menus"><button class="menuButton" onclick="window.location.href='movie_posters_01.html'">¿Qué es Palomitas?</button></div>
+                <div class="menus"><button class="menuButton activeButton" onclick="window.location.href='movie_posters_V02.html'">Busca tu película</button></div>
+                <div class="menus"><button class="menuButton" onclick="window.location.href='movie_posters_02.html'">Acerca de Palomitas</button></div>
+            </div>
+            <div id="favs">
+                <div class="favouritesIcon"></div>
+                <div class="favPosters"></div>
+            </div>
+
+        </div>
+        <div id="main">
+            <h1 class="mainText">¿Qué película quieres consultar?</h1>
+            <form id="formulario">
+                <label for="nombre">Introduce el nombre de tu película:</label>
+                <input type="text" name="nombre" id="nombre">
+                <input type="submit" value="¡Busca!">
+            </form>
+
+            <div class="filmInfo">
+                <div class="poster"></div>
+                <div class="filmTextInfo">
+                    <div class="filmTitle"></div>
+                    <div class="filmGenre"></div>
+                    <div>
+                        <p class="filmAwardsTitle" class="infoTitle"></p>
+                        <div class="filmAwards"></div>
+                    </div>
+                    <div class="filmRatings">
+                        <p class="ratingTitle" class="infoTitle"></p>
+                        <div class="ratingImdb">
+                            <div class="iconImdb"></div>
+                            <div class="calificationImdb"></div>
+                        </div>
+                        <div class="ratingRottenTomatoes">
+                            <div class="iconRottenTomatoes"></div>
+                            <div class="calificationRottenTomatoes"></div>
+                        </div>
+                        <div class="ratingMetacritic">
+                            <div class="iconMetacritic"></div>
+                            <div class="calificationMetacritic"></div>
+                        </div>
+                        <div class="eraseFav"></div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+    <div id="posterButtonContainer">
+        <div class="posterButton"></div>
+    </div>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- La llamada al AXIOS!!! -->
+    <script>
+        printFavList(); //Para que los favoritos aparezcan aunque cerremos la página
+        let data;
+        document.querySelector("#formulario").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            let userChoice = document.querySelector("#nombre").value;
+            general(userChoice);
+
+        });
+
+        function general(title) {
+
+            let splitGenres;
+            let arrayString;
+            let genreIcon;
+
+
+            axios.get('http://www.omdbapi.com/?apikey=fda2b0b6&t=' + title)
+                .then(function(response) {
+                    data = response.data;
+                    // debugger;
+                    if (!data.status == 200) {
+                        alert("Ups, algo ha fallado. Prueba a hacer la búsqueda de nuevo o inténtalo de nuevo más tarde.")
+                        return; //Como un break
+                    } else if (data.Error) {
+                        alert("Ups, el título introducido no lo conocemos.")
+                        return;
+                    }
+
+                    // console.log(response); //Para buscar la ruta del status 200
+                    let localStg = localStorage.getItem("favouritePosters");
+                    localStg = JSON.parse(localStg); // Convertimos el local storage en objeto
+                    splitGenres = data.Genre.split(",");
+                    arrayString = splitGenres.map(function(string) {
+                        return string = string.trim()
+                    })
+
+                    title = title.toLowerCase(); //Paso el valor introducido por el usuario a minúsculas.
+
+                    if (data.Title.toLowerCase() == title) { //Cambio el título de la BBDD a minúsculas para que se compare con title
+                        let exist = false;
+                        for (let i = 0; i < localStg.length; i++) {
+                            if (localStg[i].Title.toLowerCase() == title) {
+                                document.querySelector(".eraseFav").innerHTML = `<button class="menuButton" onclick="erase()">Eliminar de favoritos</button>`;
+                                exist = true;
+                            }
+                        }
+                        if (exist == false) {
+                            document.querySelector(".eraseFav").innerHTML = "";
+                        }
+                        document.querySelector(".poster").innerHTML = `<img src="${data.Poster}"</img>`
+                        document.querySelector(".posterButton").innerHTML = `<p class="posterButtonText">¿Quieres guardar el póster?</p><div class="posterButtonContainer"><button class="posterButtonClic" onclick="fav()">Añádelo a favoritos</button></div>`
+
+                        document.querySelector(".filmTitle").innerHTML = `<p>${data.Title}</p>`
+                        genres();
+                        // como en la función genres() ya tenemos los innerHTML, nos vale si únicamente llamamos a la función.
+                        awards();
+                        calification();
+
+                    }
+
+                    function genres() {
+                        // hacer un split por la coma para separar el string en un array. Hacer trim a cada palabra del array para que quite el espacio después de la coma. Hacer los if dentro de un for dependiendo del lenght del array.
+                        document.querySelector(".filmGenre").innerHTML = ""; // Para que se vacíe el div cada vez.
+                        for (i = 0; i < arrayString.length; i++) {
+                            switch (arrayString[i]) {
+                                case "Action":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Acción" src="./images/Genres/action.png"></img>`;
+                                    break;
+                                case "Thriller":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Thriller" src="./images/Genres/thriller.png"></img>`;
+                                    break;
+                                case "Adventure":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Aventuras" src="./images/Genres/adventure.png"></img>`;
+                                    break;
+                                case "Animation":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Animación" src="./images/Genres/animation.png"></img>`;
+                                    break;
+                                case "Biography":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Biopic" src="./images/Genres/biography.png"></img>`;
+                                    break;
+                                case "Comedy":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Comedia" src="./images/Genres/comedy.png"></img>`;
+                                    break;
+                                case "Documentary":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Documental" src="./images/Genres/documentary.png"></img>`;
+                                    break;
+                                case "Drama":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Drama" src="./images/Genres/drama.png"></img>`;
+                                    break;
+                                case "Family":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Familiar" src="./images/Genres/family.png"></img>`;
+                                    break;
+                                case "Fantasy":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Fantasia" src="./images/Genres/fantasy.png"></img>`;
+                                    break;
+                                case "Film noir":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Film noir" src="./images/Genres/film_noir.png"></img>`;
+                                    break;
+                                case "History":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Histórica" src="./images/Genres/history.png"></img>`;
+                                    break;
+                                case "Mistery":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Misterio" src="./images/Genres/mistery.png"></img>`;
+                                    break;
+                                case "Music":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Música" src="./images/Genres/music.png"></img>`;
+                                    break;
+                                case "Musical":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Musical" src="./images/Genres/musical.png"></img>`;
+                                    break;
+                                case "Romance":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Romance" src="./images/Genres/romance.png"></img>`;
+                                    break;
+                                case "Sci-Fi":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Ciencia ficción" src="./images/Genres/scifi.png"></img>`;
+                                    break;
+                                case "Shortfilm":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Cortometraje" src="./images/Genres/shortfilm.png"></img>`;
+                                    break;
+                                case "Sport":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Deporte" src="./images/Genres/sport.png"></img>`;
+                                    break;
+                                case "Superhero":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Superhéroes" src="./images/Genres/superhero.png"></img>`;
+                                    break;
+                                case "War":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Guerra" src="./images/Genres/war.png"></img>`;
+                                    break;
+                                case "Western":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Western" src="./images/Genres/western.png"></img>`;
+                                    break;
+                                case "Crime":
+                                    document.querySelector(".filmGenre").innerHTML += `<img title="Crimen" src="./images/Genres/crime.png"></img>`;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                    }
+
+                    function awards() {
+                        document.querySelector(".filmAwards").innerHTML = "";
+
+                        if (data.Awards.indexOf("Oscar") > 0) {
+                            document.querySelector(".filmAwards").innerHTML += `<img title="Esta película ha ganado algún Oscar" src="./images/Awards/oscars.png"></img>`
+                        }
+                        if (data.Awards.indexOf("win") > 0) {
+                            document.querySelector(".filmAwards").innerHTML += `<img title="Esta película ha sido premiada" src="./images/Awards/awards.png"></img>`
+                        }
+                        if (data.Awards.indexOf("nomination") > 0) {
+                            document.querySelector(".filmAwards").innerHTML += `<img title="Esta película ha sido nominada" src="./images/Awards/laurel.png"></img>`
+                        }
+                    }
+
+                    function calification() {
+
+                        document.querySelector(".iconImdb").innerHTML = "";
+                        document.querySelector(".calificationImdb").innerHTML = "";
+                        document.querySelector(".iconRottenTomatoes").innerHTML = "";
+                        document.querySelector(".calificationRottenTomatoes").innerHTML = "";
+                        document.querySelector(".iconMetacritic").innerHTML = "";
+                        document.querySelector(".calificationMetacritic").innerHTML = "";
+
+
+                        if (data.Ratings.length == 1) {
+                            document.querySelector(".iconImdb").innerHTML = `<img title="IMDb" src="./images/Ratings/imdb_icon25px.png"</img>`
+                            document.querySelector(".calificationImdb").innerHTML = `<p>${data.Ratings[0].Value}</p>`
+                        }
+                        if (data.Ratings.length == 2) {
+                            document.querySelector(".iconImdb").innerHTML = `<img title="IMDb" src="./images/Ratings/imdb_icon25px.png"</img>`
+                            document.querySelector(".calificationImdb").innerHTML = `<p>${data.Ratings[0].Value}</p>`
+                            document.querySelector(".iconRottenTomatoes").innerHTML = `<img title="Rotten Tomatoes" src="./images/Ratings/rottenTomatoes_icon25px.png"</img>`
+                            document.querySelector(".calificationRottenTomatoes").innerHTML = `<p>${data.Ratings[1].Value}</p>`
+                        }
+                    }
+                    if (data.Ratings.length == 3) {
+                        document.querySelector(".iconImdb").innerHTML = `<img title="IMDb" src="./images/Ratings/imdb_icon25px.png"</img>`
+                        document.querySelector(".calificationImdb").innerHTML = `<p>${data.Ratings[0].Value}</p>`
+                        document.querySelector(".iconRottenTomatoes").innerHTML = `<img title="Rotten Tomatoes" src="./images/Ratings/rottenTomatoes_icon25px.png"</img>`
+                        document.querySelector(".calificationRottenTomatoes").innerHTML = `<p>${data.Ratings[1].Value}</p>`
+                        document.querySelector(".iconMetacritic").innerHTML = `<img title="Metacritic" src="./images/Ratings/metacritic_icon25px.png"</img>`
+                        document.querySelector(".calificationMetacritic").innerHTML = `<p>${data.Ratings[2].Value}</p>`
+                            // } else {
+                            //     document.querySelector(".iconMetacritic").innerHTML = "";
+                            //     document.querySelector(".calificationMetacritic").innerHTML = "";
+                            // }
+                            // if (data.Ratings[0].Source){
+                            //     document.querySelector(".iconImdb").innerHTML = `<img title="IMDb" src="./images/Ratings/imdb_icon25px.png"</img>`
+                            //     document.querySelector(".calificationImdb").innerHTML = `<p>${data.Ratings[0].Value}</p>`
+                            // } if (data.Ratings[1].Source){
+                            //     document.querySelector(".iconRottenTomatoes").innerHTML = `<img title="Rotten Tomatoes" src="./images/Ratings/rottenTomatoes_icon25px.png"</img>`
+                            //     document.querySelector(".calificationRottenTomatoes").innerHTML = `<p>${data.Ratings[1].Value}</p>`
+                            // } if (data.Ratings[2].Source){
+                            //     document.querySelector(".iconMetacritic").innerHTML = `<img title="Metacritic" src="./images/Ratings/metacritic_icon25px.png"</img>`
+                            //     document.querySelector(".calificationMetacritic").innerHTML = `<p>${data.Ratings[2].Value}</p>`
+                            // }
+                    }
+                })
+        }
+
+        function fav() {
+
+            let favs = []; //Creo el array
+            let movie = {
+                Title: null,
+                Poster: null
+            }; //creo un objeto donde almacenar el título y el póster
+            let exist = false;
+
+            if (localStorage.getItem("favouritePosters")) { //Intenta bajarme los datos. ¿Hay datos en la local storage????
+                favs = localStorage.getItem("favouritePosters");
+                favs = JSON.parse(favs); //convertimos el string en array
+
+                for (let i = 0; i < favs.length; i++) {
+                    if (favs[i].Poster.includes(data.Poster)) {
+                        exist = true;
+
+                        //solo hace el push si el título no existe en la local Storage
+                    }
+                }
+                if (exist == false) {
+                    movie.Title = data.Title;
+                    movie.Poster = data.Poster;
+                    favs.push(movie);
+                }
+            } else {
+                movie.Title = data.Title;
+                movie.Poster = data.Poster;
+                favs.push(movie);
+            }
+            console.log(favs);
+            favs = JSON.stringify(favs); //convertimos el array a un string
+            localStorage.setItem("favouritePosters", favs) //Guardamos el array convertido a string en el localstorage, asociado a una clave
+            document.querySelector(".eraseFav").innerHTML = `<button class="menuButton" onclick="erase()">Eliminar de favoritos</button>`
+            printFavList();
+        }
+
+        function printFavList() {
+
+            if (localStorage.getItem("favouritePosters")) { //Intenta bajarme los datos.
+                let favs = localStorage.getItem("favouritePosters");
+                favs = JSON.parse(favs); //pasarlo de string a objeto
+                document.querySelector(".favPosters").innerHTML = "";
+                for (let i = 0; i < favs.length; i++) {
+                    document.querySelector(".favouritesIcon").innerHTML = `<img src="./images/favs.png"</img>`
+                    document.querySelector(".favPosters").innerHTML += `<div class="favListClick"><img style="padding-bottom: 2rem;" src="${favs[i].Poster}"</img></div>`;
+
+                }
+                let favListClicks = document.querySelectorAll(".favListClick");
+                for (let i = 0; i < favListClicks.length; i++) {
+                    favListClicks[i].addEventListener("click", function() {
+                        general(favs[i].Title);
+                        // console.log(window.localStorage);
+                        document.querySelector(".eraseFav").innerHTML = `<button class="menuButton" onclick="erase()">Eliminar de favoritos</button>`; //erase sin paréntesis para que no lo ejecute directamente
+                        //this es favListClicks. Dentro del elemento filmUrl que coja su valor
+
+                    })
+                }
+            }
+        }
+
+        function erase() {
+            let localStg = localStorage.getItem("favouritePosters");
+            localStg = JSON.parse(localStg);
+            for (let i = 0; i < localStg.length; i++) {
+                if (localStg[i].Title == data.Title) {
+                    localStg.splice(i, 1); //desde la posición i eliminar cantidad = 1. Se borra todo el objeto. Es una función para los array que borra objetos.
+                    localStg = JSON.stringify(localStg);
+                    localStorage.setItem("favouritePosters", localStg);
+                    document.querySelector(".eraseFav").innerHTML = "";
+                    printFavList(); //Volvemos a la funciçon que pinta las pelis del local Storage. Como se ha eliminado la que teníamos al recargarse no la pinta.
+                }
+
+            }
+
+        }
+    </script>
+</body>
+
+</html>

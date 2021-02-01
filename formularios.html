@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;800&display=swap" rel="stylesheet"><!-- De esta forma importamos la fuente de google fonts desde el html, para luego poder utilizarla en el css. Solamente con esto no se aplica en ningun lado -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;800&display=swap');/*De esta forma importamos la fuente de google fonts en el css, para luego poder utilizarla en el css. Solamente con esto no se aplica en ningun lado*/
+
+        *{/* De esta forma usamos la fuente en todos los elementos de la web */
+            font-family: 'Fraunces', serif;
+        }
+
+        h1{
+            font-family: 'Helvetica', serif;
+        }
+    </style>
+</head>
+<body>
+    <form id="formulario"><!-- Etiqueta de apertura del formulario, al darle al submit nos enviara por url los distintos parametros que tienen los inputs -->
+        <label for="nombre">Introduce el nombre</label><!-- Etiqueta descrictiva de los inputs. El for se usa para linkar el label con el input correspondiente -->
+        <input type="text" name="nombre" id="nombre"><!-- El type sirve para describir que tipo de datos se le puede introducir, el name para las agrupaciones y el id para diferenciarlos de otros elementos -->
+        <br>
+        <label for="email">Introduce el email</label>
+        <input type="email" name="email" id="email">
+        <br>
+        <label for="number">Escribe un numero</label>
+        <input type="number" name="number" id="number">
+        <br>
+        <label for=""></label>
+        <input type="date" name="" id="">
+        <br>
+        <label for=""></label>
+        <select name="" id=""><option value=""></option></select>
+        <br>
+        <label for=""></label>
+        <textarea name="" id="" cols="30" rows="10"></textarea>
+        <br>
+        <label for="Masculino">Masculino</label>
+        <input type="radio" name="genero" id="masculino" value="Masculino"><!-- Con el name agrupamos los radio buttons para que actuen por separado a los otros grupos de radio buttons -->
+        <label for="Femenino">Femenino</label>
+        <input type="radio" name="genero" id="femenino" value="femenino">
+        <br>
+        <label for="Masculino">Masculino</label>
+        <input type="radio" name="genero2" id="masculino" value="Masculino">
+        <label for="Femenino">Femenino</label>
+        <input type="radio" name="genero2" id="femenino" value="femenino">
+        <br>
+        <label for="seleccion">js</label>
+        <input type="checkbox" name="seleccion" id="js">
+        <label for="seleccion">html</label>
+        <input type="checkbox" name="seleccion" id="">
+        <label for="seleccion">css</label>
+        <input type="checkbox" name="seleccion" id="">
+        <input type="submit" value="Click me"><!-- Al pulsar en el submit el formulario se enviara pasando por url los values de cada input-->
+    </form>
+
+    <script>
+        document.querySelector("#formulario").addEventListener("submit", function (e){ //Este evento es el que pasa cuando clicamos en el submit del ponemos la (e) dentro del function para escribir la linea de abajo
+            e.preventDefault(); //Con esto evitamos que el formulario se recargue, es su acción por defecto
+            let nombre = document.querySelector("#nombre").value;
+            alert(nombre);
+            let number = document.querySelector("#number").value;
+            console.log(parseInt(number));
+            let checkbox = document.querySelector("#js").checked;
+            console.log(checkbox);
+            
+        })
+    </script>
+</body>
+</html>
